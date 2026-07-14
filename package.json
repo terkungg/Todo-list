@@ -1,0 +1,17 @@
+{
+  "name": "data-todo",
+  "version": "1.0.0",
+  "description": "Premium Glassmorphism Todo List with Firebase Cloud Sync",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y serve ."
+  },
+  "keywords": [
+    "todo",
+    "dashboard",
+    "firebase",
+    "glassmorphism"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Todo - ระบบจัดการงานออนไลน์ระดับพรีเมียม</title>
+    <!-- Google Fonts: Outfit & Sarabun for beautiful Thai/English UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Decorative Blurry Background Blobs -->
+    <div class="bg-blobs">
+        <div class="blob blob-purple"></div>
+        <div class="blob blob-blue"></div>
+        <div class="blob blob-pink"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar or Header -->
+        <header class="app-header glass">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i data-lucide="check-square" class="logo-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Data Todo</h1>
+                    <p>ระบบภาพรวมงานของฉัน</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="sync-status-badge glass" id="syncStatusBtn">
+                    <span class="status-dot online" id="statusDot"></span>
+                    <span id="statusText">Cloud Connected</span>
+                    <i data-lucide="cloud" class="status-icon"></i>
+                </div>
+                <button class="btn btn-icon glass" id="themeToggle" title="สลับโหมดแสง/มืด (เร็วๆ นี้)">
+                    <i data-lucide="moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview Dashboard -->
+        <section class="dashboard-stats">
+            <div class="stat-card glass" data-stat="total">
+                <div class="stat-icon-wrapper blue">
+                    <i data-lucide="folder"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">งานทั้งหมด</span>
+                    <h2 class="stat-value" id="stat-total">0</h2>
+                </div>
+                <div class="stat-progress-bar">
+                    <div class="progress-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+            
+            <div class="stat-card glass" data-stat="todo">
+                <div class="stat-icon-wrapper purple">
+                    <i data-lucide="clipboard-list"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">ยังไม่เริ่มทำ</span>
+                    <h2 class="stat-value" id="stat-todo">0</h2>
+                </div>
+                <div class="stat-progress-bar">
+                    <div class="progress-fill purple" id="progress-todo" style="width: 0%;"></div>
+                </div>
+            </div>
+            
+            <div class="stat-card glass" data-stat="in-progress">
+                <div class="stat-icon-wrapper orange">
+                    <i data-lucide="loader"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">กำลังดำเนินการ</span>
+                    <h2 class="stat-value" id="stat-progress">0</h2>
+                </div>
+                <div class="stat-progress-bar">
+                    <div class="progress-fill orange" id="progress-inprogress" style="width: 0%;"></div>
+                </div>
+            </div>
+            
+            <div class="stat-card glass" data-stat="completed">
+                <div class="stat-icon-wrapper green">
+                    <i data-lucide="check-circle-2"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">เสร็จสิ้นแล้ว</span>
+                    <h2 class="stat-value" id="stat-completed">0</h2>
+                </div>
+                <div class="stat-progress-bar">
+                    <div class="progress-fill green" id="progress-completed" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="stat-card glass overdue-card" data-stat="overdue">
+                <div class="stat-icon-wrapper red">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">เลยกำหนดส่ง</span>
+                    <h2 class="stat-value text-red" id="stat-overdue">0</h2>
+                </div>
+                <div class="stat-progress-bar">
+                    <div class="progress-fill red" id="progress-overdue" style="width: 0%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls (Filter, Sort, View, Add Button) -->
+        <section class="controls-panel glass">
+            <div class="search-box glass-inner">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchInput" placeholder="ค้นหาชื่องานหรือรายละเอียด...">
+            </div>
+
+            <div class="filter-group">
+                <div class="select-wrapper glass-inner">
+                    <i data-lucide="sliders-horizontal" class="select-icon"></i>
+                    <select id="filterPriority">
+                        <option value="all">ความสำคัญทั้งหมด</option>
+                        <option value="high">ความสำคัญสูง (High)</option>
+                        <option value="medium">ความสำคัญกลาง (Medium)</option>
+                        <option value="low">ความสำคัญต่ำ (Low)</option>
+                    </select>
+                </div>
+
+                <div class="select-wrapper glass-inner">
+                    <i data-lucide="tag" class="select-icon"></i>
+                    <select id="filterCategory">
+                        <option value="all">หมวดหมู่ทั้งหมด</option>
+                        <option value="work">งานบริษัท (Work)</option>
+                        <option value="personal">ส่วนตัว (Personal)</option>
+                        <option value="study">เรียนรู้ (Study)</option>
+                        <option value="others">อื่นๆ (Others)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="view-and-add">
+                <div class="view-toggle-group glass-inner">
+                    <button class="btn-toggle active" id="viewKanbanBtn" title="มุมมองคาร์ดบอร์ด">
+                        <i data-lucide="kanban"></i>
+                        <span>Kanban</span>
+                    </button>
+                    <button class="btn-toggle" id="viewListBtn" title="มุมมองตารางรายการ">
+                        <i data-lucide="list"></i>
+                        <span>List</span>
+                    </button>
+                </div>
+
+                <button class="btn btn-primary btn-glow" id="addTaskBtn">
+                    <i data-lucide="plus"></i>
+                    <span>สร้างงานใหม่</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Tasks Workspace -->
+        <main class="tasks-workspace">
+            <!-- 1. Kanban Board View (Default) -->
+            <div class="view-container kanban-view" id="kanbanView">
+                <!-- Column: To Do -->
+                <div class="kanban-column glass" id="col-todo">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span class="column-dot purple"></span>
+                            <h2>ยังไม่เริ่มทำ</h2>
+                            <span class="task-count" id="count-todo">0</span>
+                        </div>
+                    </div>
+                    <div class="task-list" id="list-todo">
+                        <!-- Task Cards injection -->
+                    </div>
+                </div>
+
+                <!-- Column: In Progress -->
+                <div class="kanban-column glass" id="col-inprogress">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span class="column-dot orange"></span>
+                            <h2>กำลังดำเนินการ</h2>
+                            <span class="task-count" id="count-inprogress">0</span>
+                        </div>
+                    </div>
+                    <div class="task-list" id="list-inprogress">
+                        <!-- Task Cards injection -->
+                    </div>
+                </div>
+
+                <!-- Column: Completed -->
+                <div class="kanban-column glass" id="col-completed">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <span class="column-dot green"></span>
+                            <h2>เสร็จสิ้น</h2>
+                            <span class="task-count" id="count-completed">0</span>
+                        </div>
+                    </div>
+                    <div class="task-list" id="list-completed">
+                        <!-- Task Cards injection -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. List View (Hidden by default) -->
+            <div class="view-container list-view hidden" id="listView">
+                <div class="list-table-container glass">
+                    <div class="list-table-header">
+                        <div class="col-title">ชื่องานและรายละเอียด</div>
+                        <div class="col-category">หมวดหมู่</div>
+                        <div class="col-priority">ความสำคัญ</div>
+                        <div class="col-date">วันที่สร้าง</div>
+                        <div class="col-deadline">กำหนดส่ง (Deadline)</div>
+                        <div class="col-status">สถานะ</div>
+                        <div class="col-actions">จัดการ</div>
+                    </div>
+                    <div class="list-items-wrapper" id="listItemsWrapper">
+                        <!-- List row injection -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Task Form (Add & Edit Task) -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 id="modalTitle">สร้างงานใหม่</h3>
+                <button class="btn-close" id="closeTaskModalBtn">&times;</button>
+            </div>
+            <form id="taskForm">
+                <input type="hidden" id="taskId">
+                
+                <div class="form-group">
+                    <label for="taskTitle">ชื่องาน <span class="required">*</span></label>
+                    <input type="text" id="taskTitle" required placeholder="เช่น ออกแบบ UI Dashboard, อัปเดตเอกสารงาน">
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDesc">รายละเอียดเพิ่มเติม</label>
+                    <textarea id="taskDesc" rows="3" placeholder="ระบุขอบเขตงาน รายละเอียด หรือหมายเหตุ..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskCategory">หมวดหมู่</label>
+                        <select id="taskCategory">
+                            <option value="work">งานบริษัท (Work)</option>
+                            <option value="personal">ส่วนตัว (Personal)</option>
+                            <option value="study">เรียนรู้ (Study)</option>
+                            <option value="others">อื่นๆ (Others)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskPriority">ระดับความสำคัญ</label>
+                        <select id="taskPriority">
+                            <option value="low">ต่ำ (Low)</option>
+                            <option value="medium" selected>ปานกลาง (Medium)</option>
+                            <option value="high">สูง (High)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskDate">วันที่เริ่มต้น / สร้างงาน</label>
+                        <input type="date" id="taskDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDeadline">กำหนดส่ง (Deadline) <span class="required">*</span></label>
+                        <input type="date" id="taskDeadline" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskStatus">สถานะ</label>
+                    <select id="taskStatus">
+                        <option value="todo">ยังไม่เริ่มทำ (To Do)</option>
+                        <option value="inprogress">กำลังดำเนินการ (In Progress)</option>
+                        <option value="completed">เสร็จสิ้น (Completed)</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary glass" id="cancelTaskBtn">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary" id="saveTaskBtn">บันทึกงาน</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Cloud Sync Settings -->
+    <div class="modal" id="syncModal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3>ตั้งค่าการเชื่อมต่อระบบคลาวด์ (Cloud Sync)</h3>
+                <button class="btn-close" id="closeSyncModalBtn">&times;</button>
+            </div>
+            <div class="sync-modal-body">
+                <div class="sync-intro">
+                    <p>ระบบนี้เชื่อมต่อกับ **Firebase Firestore** เพื่อบันทึกข้อมูลงานออนไลน์ของคุณ ทำให้คุณสามารถเปิดดูและแก้ไขงานจากเครื่องไหนก็ได้โดยไม่ต้องตั้งค่าใหม่</p>
+                </div>
+
+                <div class="status-panel glass-inner">
+                    <div class="status-line">
+                        <span>สถานะปัจจุบัน:</span>
+                        <strong id="modalSyncStatus" class="status-text online">กำลังใช้งานฐานข้อมูลร่วมกัน</strong>
+                    </div>
+                </div>
+
+                <details class="sync-instructions glass-inner">
+                    <summary>วิธีการตั้งค่าฐานข้อมูลของคุณเอง (ใช้งานฟรี 100%)</summary>
+                    <div class="instructions-content">
+                        <ol>
+                            <li>เข้าไปที่ <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase Console</a> ด้วยบัญชี Google</li>
+                            <li>กด **Create a project** แล้วตั้งชื่อโปรเจกต์ (เช่น MyTodoApp)</li>
+                            <li>เลือกเมนู **Web (</>)** เพื่อสร้างเว็บแอปพลิเคชัน คัดลอกข้อมูลส่วน `firebaseConfig`</li>
+                            <li>ในเมนูด้านซ้าย ไปที่ **Firestore Database** แล้วกด **Create database**</li>
+                            <li>เลือกเริ่มในโหมดทดสอบ (**Start in test mode**) เพื่อให้เขียนอ่านข้อมูลได้ฟรีทันที</li>
+                            <li>นำค่า Config JSON หรือค่าคีย์ต่างๆ มาป้อนในช่องด้านล่างนี้</li>
+                        </ol>
+                    </div>
+                </details>
+
+                <form id="firebaseConfigForm">
+                    <div class="form-group">
+                        <label for="cfgApiKey">API Key</label>
+                        <input type="text" id="cfgApiKey" placeholder="AIzaSy...">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cfgProjectId">Project ID</label>
+                            <input type="text" id="cfgProjectId" placeholder="data-todo-XXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label for="cfgAuthDomain">Auth Domain</label>
+                            <input type="text" id="cfgAuthDomain" placeholder="data-todo-XXXXX.firebaseapp.com">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cfgStorageBucket">Storage Bucket</label>
+                            <input type="text" id="cfgStorageBucket" placeholder="data-todo-XXXXX.firebasestorage.app">
+                        </div>
+                        <div class="form-group">
+                            <label for="cfgAppId">App ID</label>
+                            <input type="text" id="cfgAppId" placeholder="1:900628117461:web:dad9e9d7...">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions-sync">
+                        <button type="button" class="btn btn-secondary glass" id="resetToDefaultConfig">รีเซ็ตเป็นโปรเจกต์เริ่มต้น</button>
+                        <button type="submit" class="btn btn-primary" id="saveConfigBtn">บันทึกการตั้งค่า</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs (Compat version for direct local file:// support) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- Main Logic Script -->
+    <script src="app.js"></script>
+</body>
+</html>
