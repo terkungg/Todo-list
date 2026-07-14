@@ -67,6 +67,7 @@ const elements = {
     // Modals
     taskModal: document.getElementById('taskModal'),
     syncModal: document.getElementById('syncModal'),
+    modalTitle: document.getElementById('modalTitle'),
     
     // Task Form
     taskForm: document.getElementById('taskForm'),
